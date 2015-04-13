@@ -612,12 +612,6 @@ class SphinxQL
                     $pre .= '@'.$match['column'].' ';
                 }
 
-                if ($match['half']) {
-                    $pre .= $this->halfEscapeMatch($match['value']);
-                } else {
-                    $pre .= $this->escapeMatch($match['value']);
-                }
-
                 $values = array();
                 foreach($match['value'] as $value) {
                     if ($match['half']) {
