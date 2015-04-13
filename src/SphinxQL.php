@@ -618,6 +618,22 @@ class SphinxQL
                     $pre .= $this->escapeMatch($match['value']);
                 }
 
+                $values = array();
+                foreach($match['value'] as $value) {
+                    if ($match['half']) {
+                        $value = $this->halfEscapeMatch($value);
+                    } else {
+                        $value = $this->escapeMatch($value);
+                    }
+
+                    if (count(mb_split(' ', $value)) > 1) {
+                        $value = '('.$value.')';
+                    }
+                    $values[] = $value;
+                }
+
+                $pre .= implode( (($match['or']) ? ' | ' : ' '), $values);
+
                 $matched[] = '('.$pre.')';
             }
 
@@ -1009,16 +1025,37 @@ class SphinxQL
      * @param mixed    $column The column name (can be an array or a string)
      * @param string   $value  The value
      * @param boolean  $half  Exclude ", |, - control characters from being escaped
+     * @param boolean  $or  Operator "|" between values (if value is array)
      *
      * @return \Foolz\SphinxQL\SphinxQL The current object
      */
-    public function match($column, $value, $half = false)
+    public function match($column, $value, $half = false, $or = false)
     {
         if ($column === '*' || (is_array($column) && in_array('*', $column))) {
             $column = array();
         }
 
-        $this->match[] = array('column' => $column, 'value' => $value, 'half' => $half);
+        if(!is_array($value)) {
+            $value = array($value);
+        }
+
+        $this->match[] = array('column' => $column, 'value' => $value, 'half' => $half, 'or' => $or);
+
+        return $this;
+    }
+
+    /**
+     * MATCH clause (Sphinx-specific) with OR operator
+     *
+     * @param mixed    $column The column name (can be an array or a string)
+     * @param string   $value  The value
+     * @param boolean  $half  Exclude ", |, - control characters from being escaped
+     *
+     * @return \Foolz\SphinxQL\SphinxQL The current object
+     */
+    public function orMatch($column, $value, $half = false)
+    {
+        $this->match($column, $value, $half, true);
 
         return $this;
     }
