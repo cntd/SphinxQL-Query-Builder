@@ -620,7 +620,7 @@ class SphinxQL
                         $value = $this->escapeMatch($value);
                     }
 
-                    if (count(mb_split(' ', $value)) > 1 && count($match['value']) > 1) {
+                    if (count($match['value']) > 1) {
                         $value = '('.$value.')';
                     }
                     $values[] = $value;
